@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>圣米庐 | 项目列表</title>
+        <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
+        <!-- bootstrap 3.0.2 -->
+        <link href="css/bootstrap-3.2.0/css/bootstrap.css" rel="stylesheet" type="text/css" />
+        <link href="css/bootstrap-box.css" rel="stylesheet" type="text/css" />
+        <link href="css/bootstrap-page.css" rel="stylesheet" type="text/css" />
+        <link rel="stylesheet" href="js/resizableColumns/jquery.resizableColumns.css">
+        <link href="js/validator/jquery.validator.css" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="js/jquery-1.11.0.min.js"></script>
+        <script type="text/javascript" src="js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="js/resizableColumns/jquery.resizableColumns.js"></script>
+        <script type="text/javascript" src="js/jsviews.js"></script>
+        <script type="text/javascript" src="js/loadTmpl.js"></script>
+        <script src="js/base.js" type="text/javascript"></script>
+        <script type="text/javascript" src="js/tableGrid/jquery.tableGrid.js"></script>
+        <script	type="text/javascript" src="js/validator/jquery.validator.js"></script>
+		<script type="text/javascript" src="js/validator/local/zh_CN.js"></script>
+        <script type="text/javascript">  
+        	//从后台取数据，并加载模板
+	        function displayContent(){
+	        	var likeName = $("#se_name").val();
+	        	var likeIdentify = $("#se_identify").val();
+	        	var jsonFilter="{search_LIKE_name:\""+likeName+"\",search_LIKE_identify:\""+likeIdentify+"\"}";
+				var nextPage=$("#_click_page").val();			//不变
+				if(typeof(nextPage) == 'undefined' || nextPage==""){
+					nextPage=0;
+				}
+				var pageSize=$("#selectPageSize").val();
+				var url=root+"project";
+				$.ajax({
+					url:url,
+					dataType:'json',
+					type:'get',
+					data:{
+						nextPage:nextPage,
+						pageSize:pageSize,
+						jsonFilter:jsonFilter
+					},
+					success:function(data){
+						var tableData=data.object.content;
+		            	var tblContentHtml = $("#tableContentTmple").render(tableData);
+		            	$("#mycontent").html(tblContentHtml);
+		            	//加载分页器
+		            	loadTmpl.renderExternalTemplate("page", "#displayPage", data.object);
+					}
+				});
+	        }
+			$(function(){
+				$("#example2").resizableColumns({});	//列拖动
+				//行高亮,选中
+				$("#example2").tableGrid({
+					checkAllId:"_selectAll",	//全选框的ID属性
+					singleCheckboxClass:"ckSelect",
+					selectRowClass:"warning",
+					paging:"displayPage",
+					pageAjax:function(){
+						displayContent();
+					}
+				});
+				//点击新增按钮
+				$("#addSome").click(function(){
+					$("#myModalLabel").html("新增实体");
+// 					$("#projectCU").reset();
+					$("#projectCU")[0].reset();
+					$("#projectCU").validator("cleanUp");
+					$("#myModalDlg").modal("show");
+				});
+				//新增或修改
+				$("#projectCU").validator({
+					valid:function(form){
+						var projectId=$("#_projectId").val();
+						var name=$("#_name").val();
+						var identifiy=$("#_identify").val();
+						var description=$("#_description").val();
+						var project="";
+						if(projectId==""){
+						//新增
+						
+							project={"name":name,
+								"identify":identifiy,
+								"description":description
+							};
+							url=root+"project";	
+							$.ajax({
+								url:url,
+								type:"post",
+								dataType: "json",
+				                contentType: "application/json",
+								data:JSON.stringify(project),
+								success:function(data){
+									if(data.code==1){
+										$('#myModalDlg').modal('hide');
+										displayContent();
+									}else{
+										alert(data.message);
+									}
+								}
+							});
+						}else{
+							//修改
+							project={"id":projectId,
+								"name":name,
+								"identify":identifiy,
+								"description":description
+							};
+							url=root+"project";
+							$.ajax({
+								url:url,
+								type:"PUT",
+								dataType: "json",
+				                contentType: "application/json",
+								data:JSON.stringify(project),
+								success:function(data){
+									if(data.code==1){
+										$('#myModalDlg').modal('hide');
+										displayContent();
+									}else{
+										alert(data.message);
+									}
+								}
+							});
+						}
+					}
+				}).on("click","#saveOrupdate",function(e){
+					$(e.delegateTarget).trigger("validate");
+				});
+				
+				//点击修改按钮
+				$("#updateSome").click(function(){
+					$("#projectCU").validator("cleanUp");
+					var updateArray=new Array();
+					$(".ckSelect").each(function(){
+                    	var check=$(this).is(':checked');
+                    	if(check){
+							var _id =$(this).attr("ckId");
+							updateArray.push(_id);
+                        }
+                    });
+					if(updateArray.length==0){
+						alert("请选择要编辑的项");
+						return;
+					}
+					if(updateArray.length>1){
+						alert("每次只能编辑一项");
+						return;
+					}
+					$.ajax({
+						url:root+"project/"+updateArray[0],
+						type:"get",
+						dataType: "json",
+		                contentType: "application/json",
+						success:function(selectData){
+							if(selectData.code==1){
+								$("#_name").val(selectData.object.name);
+								$("#_identify").val(selectData.object.identify);
+								$("#_description").val(selectData.object.description);
+								$("#_projectId").val(selectData.object.id);
+								$("#myModalLabel").html("编辑实体");
+								$("#myModalDlg").modal("show");
+							}else{
+								alert(selectData.message);
+							}
+							
+						}
+					});
+				});
+				//点击属性按钮
+				$("#modelSome").click(function(){
+					var updateArray=new Array();
+					var prjName="";
+					$(".ckSelect").each(function(){
+                    	var check=$(this).is(':checked');
+                    	if(check){
+							var _id =$(this).attr("ckId");
+							updateArray.push(_id);
+							prjName=$(this).attr("prjName");
+                        }
+                    });
+					if(updateArray.length==0){
+						alert("请选择要编辑的项");
+						return;
+					}
+					if(updateArray.length>1){
+						alert("每次只能编辑一项");
+						return;
+					}
+					window.location.href=root+"entity.html?projectId="+updateArray[0]+"&prjName="+escape(prjName);
+				});
+				//点击发布按钮
+				$("#pubSome").click(function(){
+					var updateArray=new Array();
+					$(".ckSelect").each(function(){
+                    	var check=$(this).is(':checked');
+                    	if(check){
+							var _id =$(this).attr("ckId");
+							updateArray.push(_id);
+                        }
+                    });
+					if(updateArray.length==0){
+						alert("请选择要发布的项");
+						return;
+					}
+					if(updateArray.length>1){
+						alert("每次只能发布一项");
+						return;
+					}
+					window.location.href=root+"project/pub/"+updateArray[0];
+// 					$.ajax({
+// 						url:root+"project/pub/"+updateArray[0],
+// 						type:"put",
+// 						dataType: "json",
+// 		                contentType: "application/json",
+// 						success:function(selectData){
+// 							if(selectData.code==1){
+// 								displayContent();
+// 							}else{
+// 								alert(selectData.message);
+// 							}
+// 						}
+// 					});
+				});
+				//点击查询按钮
+				$("#search").click(function(){
+					displayContent();
+				});
+				//点击删除按钮
+				$("#delSome").click(function(){
+					var delStr="";
+					var delArray=new Array();
+					$(".ckSelect").each(function(){
+                    	var check=$(this).is(':checked');
+                    	if(check){
+							var _id =$(this).attr("ckId");
+							delStr+=parseInt(_id)+",";
+							delArray.push(_id);
+                        }
+                    });
+                    if(delStr.length==0){
+						alert("请选择要删除的项");
+						return
+                    }
+                    if(confirm("你确定要删除选中项吗？")){
+                    	var url=root+"project/"+delArray[0];
+                    	$.ajax({
+							url:url,
+							type:'DELETE',
+							dataType:'json',
+							success:function(data){
+								if(data.code==1){
+									displayContent();
+								}else{
+									alert(data.message);
+								}
+							}
+                        });
+                    }
+				});
+			});
+			
+        </script>
+    </head>
+    <body>
+      <section>
+          <div>
+              <div class="col-xs-12">
+                  <div class="box">
+                      <div class="box-header">
+                      <br>
+                       <span class="add-on">实体名称:</span><input type="text" id="se_name"/>
+                       <span class="add-on">工程名:</span><input type="text" id="se_identify"/>
+                          <input type="button" value="搜索" id="search" class="btn btn-primary">
+                      </div>
+                      <div class="box-header">
+                      <br>
+                          <input type="button" value="新增" id="addSome" class="btn btn-success">
+                          <input type="button" value="删除" id="delSome" class="btn btn-danger">
+                          <input type="button" value="编辑" id="updateSome" class="btn btn-info">
+                          <input type="button" value="发布" id="pubSome" class="btn btn">
+                          <input type="button" value="实体管理" id="modelSome" class="btn btn-warning">
+                      </div>
+                      <div class="box-body table-responsive">
+                          <table id="example2" class="table table-bordered table-hover">
+                              <thead>
+                                  <tr>
+                                      <th><input type="checkbox" id="_selectAll" /></th>
+                                      <th id='name'>实体中文名称</th>
+                                      <th id='identify'>工程名</th>
+                                      <th id='description'>实体描述</th>
+                                      <th id='status'>状态</th>
+                                  </tr>
+                              </thead>
+                              <!-- 表格内容 start -->
+                              <tbody id="mycontent"></tbody>
+                              <!-- 表格内容 end -->
+                          </table>
+                          <!-- 分页标签 start -->
+                          <div class="row" id="displayPage"></div>
+                          <script id="tableContentTmple" type="text/x-jsrender">
+								<tr>
+									<td><input id="ck_{{:id}}" ckId="{{:id}}" prjName="{{:name}}" class="ckSelect" type="checkbox" /></td>
+									<td>{{:name}}</td>
+									<td>{{:identify}}</td>
+									<td>{{:description}}</td>
+									<td>{{if status==0}}正常{{else status=1}}发布{{else status=2}}草稿{{else status=3}}删除{{/if}}</td>
+								</tr>
+						  </script>
+                  </div>
+              </div>
+          </div>
+      </section>
+	<!-- 新增对话框  start -->
+	<form class="form-horizontal" id="projectCU" role="form">
+	<div class="modal fade" id="myModalDlg" tabindex="-1" role="dialog"
+		aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">新增工程</h4>
+				</div>
+				<div class="modal-body">
+						<input type="hidden" id="_projectId" />
+						<div class="form-group form-group-sm">
+							<label class="col-sm-2 control-label" for="goodsName">中文名称</label>
+							<div class="col-sm-4">
+								<input class="form-control" type="text" id="_name" data-rule="中文名称:required;length[1~40]"
+									placeholder="中文名称" />
+							</div>
+						</div>
+						<div class="form-group form-group-sm">
+							<label class="col-sm-2 control-label" for="goodsName">项目名称</label>
+							<div class="col-sm-4">
+								<input class="form-control" type="text" id="_identify" data-rule="中文名称:required;length[3~40]"
+									placeholder="英文，首字母大写" />
+							</div>
+						</div>
+						<div class="form-group form-group-sm">
+							<label class="col-sm-2 control-label" for="goodsName">描述</label>
+							<div class="col-sm-4">
+								<input class="form-control" type="text" id="_description" data-rule="中文名称:required;length[1~200]"
+									placeholder="描述" />
+							</div>
+						</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭
+					</button>
+					<button type="button" id="saveOrupdate" class="btn btn-primary">
+						确定</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	</form>
+	<!-- 新增对话框  end -->
+    </body>
+</html>

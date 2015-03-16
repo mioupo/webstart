@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>圣米庐 | 系统角色</title>
+        <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
+        <!-- bootstrap 3.0.2 -->
+        <link href="css/bootstrap-3.2.0/css/bootstrap.css" rel="stylesheet" type="text/css" />
+        <link href="css/bootstrap-box.css" rel="stylesheet" type="text/css" />
+        <link href="css/bootstrap-page.css" rel="stylesheet" type="text/css" />
+        <link rel="stylesheet" href="js/resizableColumns/jquery.resizableColumns.css">
+        <script type="text/javascript" src="js/jquery-1.11.0.min.js"></script>
+        <script type="text/javascript" src="js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="js/resizableColumns/jquery.resizableColumns.js"></script>
+        <script type="text/javascript" src="js/jsviews.js"></script>
+        <script type="text/javascript" src="js/loadTmpl.js"></script>
+        <script src="js/base.js"	type="text/javascript"></script>
+        <script type="text/javascript" src="js/tableGrid/jquery.tableGrid.js"></script>
+        <script type="text/javascript">  
+        $.views.converters("isSelected",function(first,last){
+        	if(first==null) return "";
+			return first.parentId==last? "selected=selected":"";
+		});
+        	//从后台取数据，并加载模板
+	        function displayContent(){
+	        	var resourceName = $("#roleName").val();
+				var nextPage=$("#_click_page").val();			//不变
+				if(typeof(nextPage) == 'undefined' || nextPage==""){
+					nextPage=0;
+				}
+				var pageSize=$("#selectPageSize").val();
+				if(typeof(pageSize) == 'undefined' || pageSize==""){
+					pageSize=10;
+				}
+				var sortDate="[{property:'roleId',direction:'ASC'}]";
+				var jsonFilter="{search_LIKE_roleName:\""+resourceName+"\"}";
+				var url=root+"xaCmsRole/showRoles/"+nextPage+"/"+pageSize+"/"+sortDate+"/"+jsonFilter;
+				$.ajax({
+					url:url,
+					dataType:'json',
+					success:function(data){
+						var tableData=data.content;
+		            	var tblContentHtml = $("#tableContentTmple").render(tableData);
+		            	$("#mycontent").html(tblContentHtml);
+		            	//去掉复选状态
+						$("#_selectAll").prop({checked:false});
+		            	//加载分页器
+		            	loadTmpl.renderExternalTemplate("page", "#displayPage", data);
+					}
+				});
+	        }
+			$(function(){
+				$("#example2").resizableColumns({});	//列拖动
+				//行高亮,选中
+				$("#example2").tableGrid({
+					checkAllId:"_selectAll",	//全选框的ID属性
+					singleCheckboxClass:"ckSelect",
+					selectRowClass:"warning",
+					paging:"displayPage",
+					pageAjax:function(){
+						displayContent();
+					}
+				});
+				//点击新增按钮
+				$("#addSome").click(function(){
+					window.location.href=root+"cms/addRole.html";
+				});
+				//点击修改按钮
+				$("#updateSome").click(function(){
+					$("#myModalLabel").html("修改资源信息");
+					var updateArray=new Array();
+					$(".ckSelect").each(function(){
+                    	var check=$(this).is(':checked');
+                    	if(check){
+							var _id =$(this).attr("ckId");
+							updateArray.push(_id);
+                        }
+                    });
+					if(updateArray.length==0){
+						alert("请选择要编辑的项");
+						return;
+					}
+					if(updateArray.length>1){
+						alert("每次只能编辑一项");
+						return;
+					}
+					window.location.href=root+"cms/updateRole.html?roleId="+updateArray[0];
+
+				});
+				//点击查询按钮
+				$("#search").click(function(){
+					displayContent();
+				});
+				//点击删除按钮
+				$("#delSome").click(function(){
+					var delArray=new Array();
+					$(".ckSelect").each(function(){
+                    	var check=$(this).is(':checked');
+                    	if(check){
+							var _id =$(this).attr("ckId");
+							delArray.push(_id);
+                        }
+                    });
+                    if(delArray.length==0){
+						alert("请选择要删除的项");
+						return
+                    }
+                    if(confirm("你确定要删除选中项吗？")){
+                    	var delIds=""+delArray+"";
+                    	var url=root+"xaCmsRole/role/"+delIds;
+                    	$.ajax({
+							url:url,
+							type:'DELETE',
+							dataType:'json',
+							success:function(data){
+								if(data.status==1){
+									displayContent();
+								}else{
+									alert(data.result);
+								}
+							}
+                        });
+                    }
+				});
+			});
+        </script>
+    </head>
+    <body>
+      <section>
+          <div>
+              <div class="col-xs-12">
+                  <div class="box">
+                  <div class="span1">
+							<span class="badge badge-info">后台管理    &gt;  角色列表</span>
+						</div>
+                      <div class="box-header">
+                      <br>
+                       <span class="add-on">角色名称:</span><input type="text" id="roleName"/>
+                          <input type="button" value="搜索" id="search" class="btn btn-primary">
+                      </div>
+                      <div class="box-header">
+                      <br>
+                          <input type="button" value="新增" id="addSome" class="btn btn-success">
+                          <input type="button" value="删除" id="delSome" class="btn btn-danger">
+                          <input type="button" value="编辑" id="updateSome" class="btn btn-info">
+                      </div>
+                      <div class="box-body table-responsive">
+                          <table id="example2" class="table table-bordered table-hover">
+                              <thead>
+                                  <tr>
+                                      <th><input type="checkbox" id="_selectAll" /></th>
+                                      <th id='resourceName'>角色</th>
+                                      <th id='resourceUrl'>描述</th>
+                                  </tr>
+                              </thead>
+                              <!-- 表格内容 start -->
+                              <tbody id="mycontent"></tbody>
+                              <!-- 表格内容 end -->
+                          </table>
+                          <!-- 分页标签 start -->
+                          <div class="row" id="displayPage"></div>
+                          <!-- 分页标签 end -->
+                          <script id="tableContentTmple" type="text/x-jsrender">
+								<tr><td><input id="ck_{{:roleId}}" ckId="{{:roleId}}" class="ckSelect" type="checkbox" /></td><td>{{:roleName}}</td><td>{{:roleDesc}}</td></tr>
+						  </script>
+                  </div>
+              </div>
+          </div>
+      </section>
+    </body>
+</html>

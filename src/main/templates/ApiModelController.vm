@@ -1,0 +1,202 @@
+#parse ("util.vm")
+package com.xa3ti.#toLowerCase(${project.identify}).remote.controller;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
+
+import com.xa3ti.#toLowerCase(${project.identify}).base.controller.BaseController;
+import com.xa3ti.#toLowerCase(${project.identify}).base.exception.BusinessException;
+import com.xa3ti.#toLowerCase(${project.identify}).base.util.XaResult;
+import com.xa3ti.#toLowerCase(${project.identify}).base.util.WebUitl;
+import com.xa3ti.#toLowerCase(${project.identify}).business.service.#initUpperCase(${model.identify})Service;
+import com.xa3ti.#toLowerCase(${project.identify}).remote.vo.#initUpperCase(${model.identify})Vo;
+import com.xa3ti.#toLowerCase(${project.identify}).business.entity.#initUpperCase(${model.identify});
+
+/**
+ * @Title: Api#initUpperCase(${model.identify})Controller.java
+ * @Package com.xa3ti.#toLowerCase(${project.identify}).remote.controller
+ * @Description: ${model.name}信息接口
+ * @author hchen
+ * @date 2014年8月20日 下午3:03:06
+ * @version V1.0
+ */
+@Api(value = "#initUpperCase(${model.identify})", description = "${model.name}接口", position = 10)
+@Controller
+@RequestMapping("/m/#initLowerCase(${model.identify})")
+public class Api#initUpperCase(${model.identify})Controller extends BaseController {
+
+	@Autowired
+	private #initUpperCase(${model.identify})Service #initLowerCase(${model.identify})Service;
+	
+	/**
+	 * @Title: find#initUpperCase(${model.identify})List
+	 * @Description: 查询所有${model.name}信息
+	 * @return    
+	 */
+	@ApiOperation(value="查询所有${model.name}",notes="查询所有${model.name}信息,当返回的code=1时，取出object进行显示,存放为数组对象")
+	@ResponseBody
+	@RequestMapping(value="find#initUpperCase(${model.identify})List",method=RequestMethod.POST)
+	public XaResult<List<#initUpperCase(${model.identify})>> find#initUpperCase(${model.identify})List(
+		@ApiParam("页号,字段名:nextPage,默认0,从第0页开始") @RequestParam(defaultValue = "0") Integer nextPage,
+		@ApiParam("页长,字段名:pageSize,默认10") @RequestParam(defaultValue = "10") Integer pageSize,
+		@ApiParam("数据状态,字段名:status,-1锁定,0无效,1正常,2发布,3删除,选填,默认正常数据状态1") @RequestParam(defaultValue = "1") Integer status,
+		@ApiParam("排序字段,字段名:sortData,选填,默认:[{property:'createTime',direction:'DESC'}]") @RequestParam(defaultValue = "[{property:'createTime',direction:'DESC'}]") String sortData,
+		@ApiParam("过滤字段,字段名:jsonFilter,选填,默认:{},示例:{'search_EQ_field1':'value1','search_EQ_field2':'value2'},字段名称拼接规则search_为固定查询标识,EQ为等于,filed为字段名,不建议前端采用这种方式,建议前端使用指定查询字段名") @RequestParam(defaultValue = "{}") String jsonFilter
+	) throws BusinessException{
+		Pageable pageable = WebUitl.buildPageRequest(nextPage, pageSize, sortData);
+		Map<String,Object> filterParams =  WebUitl.getParametersStartingWith(jsonFilter, "search_");
+		return #initLowerCase(${model.identify})Service.find#initUpperCase(${model.identify})VoByFilter(status, filterParams, pageable);
+	}
+	
+	/**
+	 * @Title: find#initUpperCase(${model.identify})ById
+	 * @Description: 根据ID查找单条实体
+	 * @param modelId
+	 * @return    
+	 */
+	@ApiOperation(value="根据tId查询${model.name}",notes="查询${model.name}详细信息,当返回的code=1时，取出object进行显示,存放为单体对象")
+	@ResponseBody
+	@RequestMapping(value="find#initUpperCase(${model.identify})ById",method=RequestMethod.POST)
+	public XaResult<#initUpperCase(${model.identify})> find#initUpperCase(${model.identify})ById(
+		@ApiParam("编号,字段名:modelId,必填") @RequestParam(value = "modelId") Long modelId
+	) throws BusinessException{
+		return #initLowerCase(${model.identify})Service.find#initUpperCase(${model.identify})(modelId);
+	}
+	
+	/**
+	 * @Title: save
+	 * @Description: 新增一条实体
+	 * @param userId
+	 * @param model
+	 * @return    
+	 */
+	@ApiOperation(value="新增${model.name}",notes="供前端前期填充数据测试使用,上线后删除;新增${model.name},当返回的code=1时，保存成功后object返回对象")
+	@ResponseBody
+	@RequestMapping(value="save#initUpperCase(${model.identify})",method=RequestMethod.POST)
+	public XaResult<#initUpperCase(${model.identify})> save#initUpperCase(${model.identify})(
+		#foreach($property in $model.properties)
+		@ApiParam("${property.name},字段名:#initLowerCase(${property.identify})") @RequestParam(value = "#initLowerCase(${property.identify})") #setType(${property.type}) #initLowerCase(${property.identify}),
+		#end
+		HttpServletRequest request,
+		@ApiParam("用户编号,如果新建用户表,则可空;新建其他表建议添加,做创建人记录用") @RequestParam(value = "userId", required = false) Long userId
+	) throws BusinessException{
+		#initUpperCase(${model.identify}) model = new #initUpperCase(${model.identify})();
+		#foreach($property in $model.properties)
+			model.set#initUpperCase(${property.identify})(#initLowerCase(${property.identify}));
+		#end
+		return #initLowerCase(${model.identify})Service.create#initUpperCase(${model.identify})(userId,model);
+	}
+	
+	/**
+	 * @Title: 
+	 * @Description: 修改一条实体
+	 * @param userId
+	 * @param model
+	 * @return    
+	 */
+	@ApiOperation(value="修改${model.name}",notes="修改${model.name},当返回的code=1时，保存成功后object返回对象")
+	@ResponseBody
+	@RequestMapping(value="update#initUpperCase(${model.identify})",method=RequestMethod.POST)
+	public XaResult<#initUpperCase(${model.identify})> update#initUpperCase(${model.identify})(
+		#foreach($property in $model.properties)
+		@ApiParam("${property.name},字段名:#initLowerCase(${property.identify})") @RequestParam(value = "#initLowerCase(${property.identify})") #setType(${property.type}) #initLowerCase(${property.identify}),
+		#end
+		HttpServletRequest request,
+		@ApiParam("用户编号,建议添加,做修改人记录用") @RequestParam(value = "userId", required = false) Long userId
+	) throws BusinessException{
+		#initUpperCase(${model.identify}) model = new #initUpperCase(${model.identify})();
+		#foreach($property in $model.properties)
+			model.set#initUpperCase(${property.identify})(#initLowerCase(${property.identify}));
+		#end
+		return #initLowerCase(${model.identify})Service.update#initUpperCase(${model.identify})(userId,model);
+	}
+	
+	/**
+	 * @Title: operate#initUpperCase(${model.identify})ById
+	 * @Description: 操作一个实体状态,根据status进行操作
+	 * @param modelId
+	 * @param status 		操作类型:-1锁定,0无效,1正常,2发布,3删除,默认删除操作
+	 * @return    
+	 */
+	@ApiOperation(value="图片上传",notes="异步图片上传,返回上传图片的地址、宽、高")
+	@ResponseBody
+	@RequestMapping(value="operate#initUpperCase(${model.identify})ById",method=RequestMethod.POST)
+	public XaResult<#initUpperCase(${model.identify})> operate#initUpperCase(${model.identify})ById(
+		HttpServletRequest request,
+		@ApiParam("编号,字段名:modelId,必填") @RequestParam(value = "modelId") Long modelId,
+		@ApiParam("操作类型,字段名:status,-1锁定,0无效,1正常,2发布,3删除,选填,默认删除操作") @RequestParam(defaultValue = "3") Integer status
+	) throws BusinessException{
+		Long userId = WebUitl.getCmsLoginedUserId(request);
+		return #initLowerCase(${model.identify})Service.operate#initUpperCase(${model.identify})(userId,modelId,status);
+	}
+	
+	/**
+	 * @Title: upload
+	 * @Description: 图片上传
+	 * @param photoFile
+	 * @param request
+	 * @return    
+	 */
+	@ResponseBody
+	@RequestMapping(value="photoUpload",method=RequestMethod.POST)
+	public XaResult<Map<String, Object>> photoUpload(
+		@ApiParam("上传的图片,字段名:photoFile,必填") @RequestParam(value = "photoFile") MultipartFile photoFile, 
+		HttpServletRequest request
+	) throws BusinessException{
+		XaResult<Map<String, Object>> result = new XaResult<Map<String, Object>>();
+		String root=request.getSession().getServletContext().getRealPath("/");
+		String picturePath = "/upload/#initLowerCase(${model.identify})";
+		String ext =photoFile.getOriginalFilename().substring(photoFile.getOriginalFilename().lastIndexOf("."));
+		String newName = new Date().getTime()+ext;
+		File filedict = new File(root+picturePath);
+		if(!filedict.exists()){
+			filedict.mkdir();
+		}
+		File targetFile=new File(root+picturePath+File.separator+newName);
+		try {
+			if(StringUtils.equalsIgnoreCase(ext, ".jpg") || StringUtils.equalsIgnoreCase(ext, ".png")){
+				photoFile.transferTo(targetFile);
+				BufferedImage bimg = ImageIO.read(targetFile);
+				int width = bimg.getWidth();
+				int height = bimg.getHeight();
+				Map<String, Object> map = new HashMap<String, Object>();
+				map.put("pictureHeight",height);
+				map.put("pictureWidth",width);
+				map.put("picturePath",picturePath+"/"+newName);
+				result.setObject(map);
+				return result;
+			}
+			else{
+				throw new BusinessException("上传文件类型不允许,请上传jpg/png图片");
+			}
+		} catch (IllegalStateException e) {
+			throw new BusinessException("图片上传失败");
+		} catch (IOException e) {
+			throw new BusinessException("图片上传失败");
+		} catch (Exception e) {
+			throw new BusinessException("图片上传失败");
+		}
+	}
+}
+

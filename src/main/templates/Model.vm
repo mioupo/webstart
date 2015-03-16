@@ -1,0 +1,52 @@
+#parse ("util.vm")
+package com.xa3ti.#toLowerCase(${project.identify}).business.entity;
+
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Version;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+
+import com.xa3ti.#toLowerCase(${project.identify}).base.constant.XaConstant;
+import com.xa3ti.#toLowerCase(${project.identify}).base.util.XaUtil;
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
+import com.xa3ti.#toLowerCase(${project.identify}).base.entity.BaseEntity;
+
+/**
+ * 
+* @ClassName: ${model.identify} 
+* @Description: ${model.name}定义表
+* @author 曹文波
+* @date 2014年10月11日 上午10:47:49 
+*
+ */
+@Entity
+@Table(name = "tb_xa_#toLowerCase(${model.identify})")
+@ApiModel(value="${model.name}定义表")
+public class #initUpperCase(${model.identify}) extends BaseEntity{
+	
+	#foreach(${property} in ${model.properties})
+	@ApiModelProperty(value="${property.name},${property.description}")
+	private #setType(${property.type}) #initLowerCase(${property.identify});
+	#end
+	
+	
+	#foreach($property in $model.properties)
+	public void set#initUpperCase(${property.identify})(#setType(${property.type}) #initLowerCase(${property.identify})){
+		this.#initLowerCase(${property.identify})=#initLowerCase(${property.identify});
+	}
+	
+	#column($property)
+	public #setType(${property.type}) get#initUpperCase(${property.identify})(){
+		return #initLowerCase(${property.identify});
+	}
+	#end
+	
+
+}

@@ -1,0 +1,91 @@
+<div class="col-xs-6">
+   <div class="dataTables_info" id="example2_info" role="status" aria-live="polite">
+   {{if numberOfElements==0}}
+   暂无数据 
+   {{else}}
+   显示第 {{:number*size+1}} 
+   条到第 {{:number*size+numberOfElements}} 
+   条  共 
+   {{:totalElements}} 条 每页显示
+   <select id="selectPageSize" style="background-color: #fff;background-image: none;border: 1px solid #ccc;border-radius: 4px;box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset; color: #555;font-size: 14px;height: 34px;line-height: 1.42857;padding: 6px 12px;transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s ease-in-out 0s;height: 30px;">
+   <option {{pageSizeSelected:size 10}}>10</option>
+   <option {{pageSizeSelected:size 20}}>20</option>
+   <option {{pageSizeSelected:size 50}}>50</option>
+   <option {{pageSizeSelected:size 100}}>100</option>
+   <option {{pageSizeSelected:size 200}}>200</option>
+   </select>条{{/if}}
+   </div>
+</div>
+<div class="col-xs-6">
+   <div class="dataTables_paginate paging_simple_numbers" id="example2_paginate">
+      <ul class="pagination">
+		{{if totalPages<6}}
+			{{if firstPage}}
+                <li class="paginate_button previous disabled" id="example2_previous"><a href="javascript:void(0)">上一页</a></li>
+			{{else}}
+                <li class="paginate_button previous" id="example2_previous" thispage="{{:number-1}}"><a href="javascript:void(0)">上一页</a></li>
+			{{/if}}
+			{{if totalPages>=1}}
+				<li class="paginate_button {{if number+1===1}}active{{/if}}" thispage="0" ><a href="javascript:void(0)">1</a></li>
+			{{/if}}
+			{{if totalPages>=2}}
+				<li class="paginate_button {{if number+1===2}}active{{/if}}" thispage="1" ><a href="javascript:void(0)">2</a></li>
+			{{/if}}
+			{{if totalPages>=3}}
+				<li class="paginate_button {{if number+1===3}}active{{/if}}" thispage="2" ><a href="javascript:void(0)">3</a></li>
+			{{/if}}
+			{{if totalPages>=4}}
+				<li class="paginate_button {{if number+1===4}}active{{/if}}" thispage="3" ><a href="javascript:void(0)">4</a></li>
+			{{/if}}
+			{{if totalPages>=5}}
+				<li class="paginate_button {{if number+1===5}}active{{/if}}" thispage="4" ><a href="javascript:void(0)">5</a></li>
+			{{/if}}
+			{{if lastPage}}
+               <li class="paginate_button next disabled" id="example2_next"><a href="javascript:void(0)">下一页</a></li>
+			{{else}}
+               <li class="paginate_button next" id="example2_next" thispage="{{:number+1}}"><a href="javascript:void(0)">下一页</a></li>
+			{{/if}}
+		{{else}}
+			{{if firstPage}}
+                <li class="paginate_button previous disabled" id="example2_previous"><a href="javascript:void(0)">上一页</a></li>
+			{{else}}
+                <li class="paginate_button previous" id="example2_previous" thispage="{{:number-1}}"><a href="javascript:void(0)">上一页</a></li>
+			{{/if}}
+				{{if (number+1)<5}}
+					{{!--(number+1)表示为当前页,显示前4页的效果--}}
+					<li class="paginate_button {{if number+1===1}}active{{/if}}" thispage="0" ><a href="javascript:void(0)">1</a></li>
+					<li class="paginate_button  {{if number+1===2}}active{{/if}}" thispage="1" ><a href="javascript:void(0)">2</a></li>
+					<li class="paginate_button  {{if number+1===3}}active{{/if}}" thispage="2"><a href="javascript:void(0)">3</a></li>
+					<li class="paginate_button {{if number+1===4}}active{{/if}}" thispage="3"><a href="javascript:void(0)">4</a></li>
+					<li class="paginate_button {{if number+1===5}}active{{/if}}" thispage="4"><a href="javascript:void(0)">5</a></li>
+					<li class="paginate_button disabled" aria-controls="example2"><a href="javascript:void(0)">...</a></li>
+					<li class="paginate_button " thispage="{{:totalPages-1}}"><a href="javascript:void(0)">{{:totalPages}}</a></li>
+				{{else ((number+1)>=5 && (number+1)	<(totalPages-3))}}
+					{{!--(number+1)表示为当前页,显示从第5页到总页数-4的页数的效果--}}
+					<li class="paginate_button " thispage="1"><a href="javascript:void(0)">1</a></li>
+					<li class="paginate_button disabled" ><a href="javascript:void(0)">...</a></li>
+                    <li class="paginate_button " thispage="{{:number-1}}"><a href="javascript:void(0)">{{:number}}</a></li>
+					<li class="paginate_button active"><a href="javascript:void(0)">{{:number+1}}</a></li>
+					<li class="paginate_button " thispage="{{:number+1}}" id="example2_ellipsis"><a href="javascript:void(0)">{{:number+2}}</a></li>
+					<li class="paginate_button disabled" ><a href="javascript:void(0)">...</a></li>
+					<li class="paginate_button "  thispage="{{:totalPages-1}}"><a href="javascript:void(0)">{{:totalPages}}</a></li>
+				{{else}}
+					{{!--(number+1)表示为当前页,显示最后5页的效果--}}
+					<li class="paginate_button "  thispage="0"><a href="javascript:void(0)">1</a></li>
+					<li class="paginate_button disabled" ><a href="javascript:void(0)">...</a></li>
+					<li class="paginate_button {{if number+1===totalPages-4}}active{{/if}}"  thispage="{{:totalPages-5}}"><a href="javascript:void(0)">{{:totalPages-4}}</a></li>
+					<li class="paginate_button {{if number+1===totalPages-3}}active{{/if}}"  thispage="{{:totalPages-4}}"><a href="javascript:void(0)">{{:totalPages-3}}</a></li>
+					<li class="paginate_button {{if number+1===totalPages-2}}active{{/if}}"  thispage="{{:totalPages-3}}"><a href="javascript:void(0)">{{:totalPages-2}}</a></li>
+					<li class="paginate_button {{if number+1===totalPages-1}}active{{/if}}"  thispage="{{:totalPages-2}}"><a href="javascript:void(0)">{{:totalPages-1}}</a></li>
+					<li class="paginate_button {{if number+1===totalPages}}active{{/if}}"  thispage="{{:totalPages-1}}"><a href="javascript:void(0)">{{:totalPages}}</a></li>
+				{{/if}}
+				{{if lastPage}}
+                    <li class="paginate_button next disabled" id="example2_next"><a href="javascript:void(0)">上一页</a></li>
+				{{else}}
+                    <li class="paginate_button next"  thispage="{{:number+1}}" id="example2_next"><a href="javascript:void(0)">下一页</a></li>
+				{{/if}}
+		{{/if}}
+      </ul>
+  </div>
+</div>
+<input type="hidden" id="_click_page" />

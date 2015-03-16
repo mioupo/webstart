@@ -1,0 +1,32 @@
+##首字母大写
+#macro(initUpperCase $field)
+$field.toUpperCase().substring(0,1)$field.substring(1)##
+#end
+##
+##首字母小写
+#macro(initLowerCase $field)
+$field.toLowerCase().substring(0,1)$field.substring(1)##
+#end
+##
+##全小写
+#macro(toLowerCase $field)
+$field.toLowerCase()##
+#end
+##
+##判断是否需要逗号
+#macro(appendComma $field)
+#if($field.substring($field.length-1)!=","),#end
+#end
+##
+##拼接@Column
+#macro(column $property)
+#set($str="@Column(")
+#if($property.nullAble==1)#set($str="${str}nullable=false")#else#set($str="${str}nullable=true")#end
+#if($property.length>0)#set($str="${str}#appendComma(${str})length=${property.length}")#end
+#if($property.type=="MEDIUMTEXT")#set($str="${str}#appendComma(${str})columnDefinition=""MEDIUMTEXT""")#end
+#if($porperty.pype=="Double")#set($str="${str}#appendComma(${str})precision=12, scale=2")#end
+#set($str="${str})")$str
+#end
+##
+##SetType
+#macro(setType $type)#if($type=="MEDIUMTEXT")String#else${type}#end#end

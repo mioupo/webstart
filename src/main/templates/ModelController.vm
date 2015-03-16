@@ -1,0 +1,250 @@
+#parse ("util.vm")
+package com.xa3ti.#toLowerCase(${project.identify}).business.controller;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.xa3ti.#toLowerCase(${project.identify}).base.constant.XaConstant;
+import com.xa3ti.#toLowerCase(${project.identify}).base.controller.BaseController;
+import com.xa3ti.#toLowerCase(${project.identify}).base.exception.BusinessException;
+import com.xa3ti.#toLowerCase(${project.identify}).base.util.WebUitl;
+import com.xa3ti.#toLowerCase(${project.identify}).base.util.XaResult;
+import com.xa3ti.#toLowerCase(${project.identify}).business.entity.#initUpperCase(${model.identify});
+import com.xa3ti.#toLowerCase(${project.identify}).business.service.#initUpperCase(${model.identify})Service;
+
+/**
+ * @Title: #initUpperCase(${model.identify})Controller.java
+ * @Package com.xa3ti.webstart.business.controller
+ * @Description: ${model.name}控制器
+ * @author hchen
+ * @date 2014年10月14日 下午6:35:35
+ * @version V1.0
+ */
+@Controller
+@RequestMapping("/cms/#initLowerCase(${model.identify})")
+public class #initUpperCase(${model.identify})Controller extends BaseController {
+
+	@Autowired
+	private #initUpperCase(${model.identify})Service #initLowerCase(${model.identify})Service;
+	
+	/**
+	 * @Title: find#initUpperCase(${model.identify})NEStatusPage
+	 * @Description: 分页查询#initUpperCase(${model.identify})
+	 * @param nextPage
+	 * @param pageSize
+	 * @param status		//默认查询非删除3的数据,具体类型参照XaConstant.Status
+	 * @param sortDate
+	 * @param jsonFilter
+	 * @return    
+	 */
+	@ResponseBody
+	@RequestMapping(value="find#initUpperCase(${model.identify})NEStatusPage",method=RequestMethod.POST)
+	public XaResult<Page<#initUpperCase(${model.identify})>> find#initUpperCase(${model.identify})NEStatusPage(
+			@RequestParam(defaultValue = "0") Integer nextPage,
+			@RequestParam(defaultValue = "10") Integer pageSize,
+			@RequestParam(defaultValue = "3") Integer status,
+			@RequestParam(defaultValue = "[{property:'createTime',direction:'DESC'}]") String sortData,
+			//过滤字段,字段名:jsonFilter,选填,默认:{},示例:{'search_EQ_field1':'value1','search_EQ_field2':'value2'},字段名称拼接规则search_为固定查询标识,EQ为等于,filed为字段名
+			//EQ等于, IN包含, ISNULL空, LIKE, GT大于, LT小于, GTE大于等于, LTE小于等于, NE不等于,LIKEIGNORE非like 
+			@RequestParam(defaultValue = "{}") String jsonFilter
+		) throws BusinessException{
+		Pageable pageable = WebUitl.buildPageRequest(nextPage, pageSize, sortData);
+		Map<String,Object> filterParams =  WebUitl.getParametersStartingWith(jsonFilter, "search_");
+		return #initLowerCase(${model.identify})Service.find#initUpperCase(${model.identify})NEStatusByFilter(status, filterParams, pageable);
+	}
+	
+	/**
+	 * @Title: find#initUpperCase(${model.identify})EQStatusPage
+	 * @Description: (预留)分页查询#initUpperCase(${model.identify})
+	 * @param nextPage
+	 * @param pageSize
+	 * @param status		//默认查询正常状态1的数据,具体类型参照XaConstant.Status
+	 * @param sortDate
+	 * @param jsonFilter
+	 * @return    
+	 */
+	@ResponseBody
+	@RequestMapping(value="find#initUpperCase(${model.identify})EQStatusPage",method=RequestMethod.POST)
+	public XaResult<Page<#initUpperCase(${model.identify})>> find#initUpperCase(${model.identify})EQStatusPage(
+			@RequestParam(defaultValue = "0") Integer nextPage,
+			@RequestParam(defaultValue = "10") Integer pageSize,
+			@RequestParam(defaultValue = "1") Integer status,
+			@RequestParam(defaultValue = "[{property:'createTime',direction:'DESC'}]") String sortData,
+			@RequestParam(defaultValue = "{}") String jsonFilter
+		) throws BusinessException{
+		Pageable pageable = WebUitl.buildPageRequest(nextPage, pageSize, sortData);
+		Map<String,Object> filterParams =  WebUitl.getParametersStartingWith(jsonFilter, "search_");
+		return #initLowerCase(${model.identify})Service.find#initUpperCase(${model.identify})EQStatusByFilter(status, filterParams, pageable);
+	}
+	
+	/**
+	 * @Title: find#initUpperCase(${model.identify})SelectTypes
+	 * @Description: 获取查询项中需要获取数据字典的操作
+	 * @return    
+	 */
+	@ResponseBody
+	@RequestMapping(value="find#initUpperCase(${model.identify})SelectTypes",method=RequestMethod.POST)
+	public XaResult<#initUpperCase(${model.identify})> find#initUpperCase(${model.identify})SelectTypes(
+			
+		) throws BusinessException{
+		return new XaResult<#initUpperCase(${model.identify})>();
+	}
+	
+	/**
+	 * @Title: find#initUpperCase(${model.identify})ById
+	 * @Description: 根据ID查找单条实体
+	 * @param modelId
+	 * @return    
+	 */
+	@ResponseBody
+	@RequestMapping(value="find#initUpperCase(${model.identify})ById",method=RequestMethod.POST)
+	public XaResult<#initUpperCase(${model.identify})> find#initUpperCase(${model.identify})ById(
+			@RequestParam Long modelId
+		) throws BusinessException{
+		return #initLowerCase(${model.identify})Service.find#initUpperCase(${model.identify})(modelId);
+	}
+	/**
+	 * @Title: save
+	 * @Description: 新增一条实体
+	 * @param model
+	 * @return    
+	 */
+	@ResponseBody
+	@RequestMapping(value="save#initUpperCase(${model.identify})",method=RequestMethod.POST)
+	public XaResult<#initUpperCase(${model.identify})> save#initUpperCase(${model.identify})(
+		#foreach($property in $model.properties)
+		@RequestParam(value = "#initLowerCase(${property.identify})") #setType(${property.type}) #initLowerCase(${property.identify}),
+		#end
+		HttpServletRequest request
+	) throws BusinessException{
+		Long userId = WebUitl.getCmsLoginedUserId(request);
+		#initUpperCase(${model.identify}) model = new #initUpperCase(${model.identify})();
+		#foreach($property in $model.properties)
+			model.set#initUpperCase(${property.identify})(#initLowerCase(${property.identify}));
+		#end
+		return #initLowerCase(${model.identify})Service.create#initUpperCase(${model.identify})(userId,model);
+	}
+	
+	/**
+	 * @Title: updateModel
+	 * @Description: 修改一条实体
+	 * @param model
+	 * @return    
+	 */
+	@ResponseBody
+	@RequestMapping(value="update#initUpperCase(${model.identify})",method=RequestMethod.POST)
+	public XaResult<#initUpperCase(${model.identify})> update#initUpperCase(${model.identify})(
+		#foreach($property in $model.properties)
+		@RequestParam(value = "#initLowerCase(${property.identify})") #setType(${property.type}) #initLowerCase(${property.identify}),
+		#end
+		@RequestParam(value = "tId") Long tId,
+		HttpServletRequest request
+	) throws BusinessException{
+		Long userId = WebUitl.getCmsLoginedUserId(request);
+		#initUpperCase(${model.identify}) model = new #initUpperCase(${model.identify})();
+		#foreach($property in $model.properties)
+			model.set#initUpperCase(${property.identify})(#initLowerCase(${property.identify}));
+		#end
+		model.settId(tId);;
+		return #initLowerCase(${model.identify})Service.update#initUpperCase(${model.identify})(userId,model);
+	}
+	
+	/**
+	 * @Title: operate#initUpperCase(${model.identify})ById
+	 * @Description: 操作一个实体状态,根据status进行操作
+	 * @param modelId
+	 * @param status 		操作类型,status类型见XaConstant.Status,默认删除操作
+	 * @return    
+	 */
+	@ResponseBody
+	@RequestMapping(value="operate#initUpperCase(${model.identify})ById",method=RequestMethod.POST)
+	public XaResult<#initUpperCase(${model.identify})> operate#initUpperCase(${model.identify})ById(
+			HttpServletRequest request,
+			@RequestParam Long modelId,
+			@RequestParam(defaultValue = "3") Integer status
+		) throws BusinessException{
+		Long userId = WebUitl.getCmsLoginedUserId(request);
+		return #initLowerCase(${model.identify})Service.operate#initUpperCase(${model.identify})(userId,modelId,status);
+	}
+	
+	/**
+	 * @Title: multiOperate#initUpperCase(${model.identify})ByIds
+	 * @Description: 批量操作多个实体状态,根据status进行操作
+	 * @param modelIds    	多个实体id,中间用逗号隔开
+	 * @param status 		操作类型,status类型见XaConstant.Status,默认删除操作
+	 * @return    
+	 */
+	@ResponseBody
+	@RequestMapping(value="operate#initUpperCase(${model.identify})ByIds",method=RequestMethod.POST)
+	public XaResult<#initUpperCase(${model.identify})> operate#initUpperCase(${model.identify})ByIds(
+			HttpServletRequest request,
+			@RequestParam String modelIds,
+			@RequestParam(defaultValue = "3") Integer status
+		) throws BusinessException{
+		Long userId = WebUitl.getCmsLoginedUserId(request);
+		return #initLowerCase(${model.identify})Service.multiOperate#initUpperCase(${model.identify})(userId,modelIds,status);
+	}
+	
+	/**
+	 * @Title: upload
+	 * @Description: 图片上传
+	 * @param photoFile
+	 * @param request
+	 * @return    
+	 */
+	@ResponseBody
+	@RequestMapping(value="photoUpload",method=RequestMethod.POST)
+	public String photoUpload(
+		@RequestParam(value = "photoFile", required = false) MultipartFile photoFile, 
+		HttpServletRequest request
+	){
+		String root=request.getSession().getServletContext().getRealPath("/");
+		String picturePath = "/upload/#initLowerCase(${model.identify})";
+		String ext =photoFile.getOriginalFilename().substring(photoFile.getOriginalFilename().lastIndexOf("."));
+		String newName = new Date().getTime()+ext;
+		File filedict = new File(root+picturePath);
+		if(!filedict.exists()){
+			filedict.mkdir();
+		}
+		File targetFile=new File(root+picturePath+File.separator+newName);
+		try {
+			if(StringUtils.equalsIgnoreCase(ext, ".jpg") || StringUtils.equalsIgnoreCase(ext, ".png")){
+				photoFile.transferTo(targetFile);
+				BufferedImage bimg = ImageIO.read(targetFile);
+				int width = bimg.getWidth();
+				int height = bimg.getHeight();
+				Map<String, Object> map = new HashMap<String, Object>();
+				map.put("pictureHeight",height);
+				map.put("pictureWidth",width);
+				return XaConstant.Code.success+":"+picturePath+"/"+newName+":"+height+":"+width;
+			}
+			else{
+				return XaConstant.Code.error+":上传文件类型不允许,请上传jpg/png图片";
+			}
+		} catch (IllegalStateException e) {
+			return XaConstant.Code.error+":图片上传失败";
+		} catch (IOException e) {
+			return XaConstant.Code.error+":图片上传失败";
+		} catch (Exception e) {
+			return XaConstant.Code.error+":图片上传失败";
+		}
+	}
+}
+

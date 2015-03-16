@@ -1,0 +1,66 @@
+#parse ("util.vm")
+package com.xa3ti.#toLowerCase(${project.identify}).remote.vo;
+
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
+
+/**
+ * @ClassName: #initUpperCase(${model.identify})Vo
+ * @Description:${model.name} Vo
+ * @author hchen
+ * @date 2014年8月13日 下午1:40:23
+ *
+ */
+@ApiModel(value="${model.name}Vo对象")
+public class #initUpperCase(${model.identify})Vo {
+
+	@ApiModelProperty(value="主键，自动增长")
+	private Long id;
+	
+	@ApiModelProperty(value="创建时间")
+	private String createTime;
+	
+ 	#foreach(${property} in ${model.properties})
+	@ApiModelProperty(value="${property.name},${property.description}")
+	private #setType(${property.type}) #initLowerCase(${property.identify});
+	#end
+	
+	public #initUpperCase(${model.identify})Vo(Long id#foreach(${property} in ${model.properties}),#setType(${property.type}) #initLowerCase(${property.identify})#end) {
+		this.id = id;
+	#foreach(${property} in ${model.properties}) 
+	this.#initLowerCase(${property.identify}) = #initLowerCase(${property.identify});
+	#end
+	}
+	
+	public #initUpperCase(${model.identify})Vo() {
+		super();
+	}
+	
+	public Long getTId() {
+		return id;
+	}
+	
+	public void setId(Long id) {
+		this.id = id;
+	}
+	
+	public String getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(String createTime) {
+		this.createTime = createTime;
+	}
+	
+	#foreach($property in $model.properties)
+	public void set#initUpperCase(${property.identify})(#setType(${property.type}) #initLowerCase(${property.identify})){
+		this.#initLowerCase(${property.identify})=#initLowerCase(${property.identify});
+	}
+	
+	public #setType(${property.type}) get#initUpperCase(${property.identify})(){
+		return #initLowerCase(${property.identify});
+	}
+	#end
+	
+}
+

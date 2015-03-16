@@ -1,0 +1,116 @@
+#parse ("util.vm")
+package com.xa3ti.#toLowerCase(${project.identify}).test.service;
+
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
+import org.springframework.data.domain.Page;
+
+import com.alibaba.fastjson.JSON;
+import com.xa3ti.#toLowerCase(${project.identify}).base.exception.BusinessException;
+import com.xa3ti.#toLowerCase(${project.identify}).base.constant.XaConstant;
+import com.xa3ti.#toLowerCase(${project.identify}).base.util.XaResult;
+import com.xa3ti.#toLowerCase(${project.identify}).base.util.XaUtil;
+import com.xa3ti.#toLowerCase(${project.identify}).business.entity.#initUpperCase(${model.identify});
+import com.xa3ti.#toLowerCase(${project.identify}).business.service.#initUpperCase(${model.identify})Service;
+import com.xa3ti.#toLowerCase(${project.identify}).test.base.XaTestBase;
+
+/**
+ * @ClassName: Test#initUpperCase(${model.identify})Service
+ * @Description: ${model.name}信息业务测试类
+ * @author hchen
+ * @date 2014年8月14日 下午2:09:21
+ *
+ */
+public class Test#initUpperCase(${model.identify})Service extends XaTestBase {
+
+	@Autowired
+	private #initUpperCase(${model.identify})Service #initLowerCase(${model.identify})Service;
+	
+	
+	/**
+	 * @Title: testCreate#initUpperCase(${model.identify})
+	 *
+	 * @Description: 创建 
+	 */
+	@Test
+	public void testCreate#initUpperCase(${model.identify})() throws BusinessException{
+		#initUpperCase(${model.identify}) #initLowerCase(${model.identify}) = new #initUpperCase(${model.identify})();
+		//请在这里构造测试数据
+		XaResult<#initUpperCase(${model.identify})> xr = #initLowerCase(${model.identify})Service.create#initUpperCase(${model.identify})(1L,#initLowerCase(${model.identify}));
+		System.out.println("code:"+xr.getCode()+"   message:"+xr.getMessage()+"  object:"+xr.getObject());
+		System.out.println(JSON.toJSONString(xr.getObject()));
+	}
+	
+	/**
+	 * @Title: testOperate#initUpperCase(${model.identify})
+	 * @Description: 单条更改状态    
+	 */
+	@Test
+	public void testOperate#initUpperCase(${model.identify})() throws BusinessException{
+		XaResult<#initUpperCase(${model.identify})> xr = #initLowerCase(${model.identify})Service.operate#initUpperCase(${model.identify})(1L, 1L, XaConstant.Status.delete);
+		System.out.println("code:"+xr.getCode()+"   message:"+xr.getMessage()+"  object:"+xr.getObject());
+		System.out.println(JSON.toJSONString(xr.getObject()));
+	}
+	
+	/**
+	 * @Title: testMultiOperate#initUpperCase(${model.identify})
+	 * @Description: 多条更改状态    
+	 */
+	@Test
+	public void testMultiOperate#initUpperCase(${model.identify})() throws BusinessException{
+		XaResult<#initUpperCase(${model.identify})> xr = #initLowerCase(${model.identify})Service.multiOperate#initUpperCase(${model.identify})(1L, "1,2", XaConstant.Status.delete);
+		System.out.println("code:"+xr.getCode()+"   message:"+xr.getMessage()+"  object:"+xr.getObject());
+		System.out.println(JSON.toJSONString(xr.getObject()));
+	}
+	
+	/**
+	 * @Title: testFindCompanyByPage
+	 * @Description: 分页查询    
+	 */
+	@Test
+	public void testFind#initUpperCase(${model.identify})ByPage() throws BusinessException{
+		Pageable pageable = new PageRequest(0, 10);
+		XaResult<Page<#initUpperCase(${model.identify})>> xr = #initLowerCase(${model.identify})Service.find#initUpperCase(${model.identify})EQStatusByFilter(XaConstant.Status.valid, null, pageable);
+		System.out.println("code:"+xr.getCode()+"   message:"+xr.getMessage()+"  object:"+xr.getObject());
+		System.out.println(JSON.toJSONString(xr.getObject()));
+	}
+	
+	
+	/**
+	 * @Title: testFind#initUpperCase(${model.identify})ById
+	 * @Description: 查询详情    
+	 */
+	@Test
+	public void testFind#initUpperCase(${model.identify})ById() throws BusinessException{
+		XaResult<#initUpperCase(${model.identify})> xr = #initLowerCase(${model.identify})Service.find#initUpperCase(${model.identify})(1L);
+		System.out.println("code:"+xr.getCode()+"   message:"+xr.getMessage()+"  object:"+xr.getObject());
+		System.out.println(JSON.toJSONString(xr.getObject()));
+		
+	}
+ 
+	
+	/**
+	 * @Title: testUpdate#initUpperCase(${model.identify})
+	 * @Description: 测试修改   
+	 */
+	@Test
+	public void testUpdate#initUpperCase(${model.identify})() throws BusinessException{
+ 
+		XaResult<#initUpperCase(${model.identify})> xr = #initLowerCase(${model.identify})Service.find#initUpperCase(${model.identify})(1l);
+		if(xr.getCode()==0){
+			#initUpperCase(${model.identify}) #initLowerCase(${model.identify}) = xr.getObject();
+			//请构造测试信息
+			XaResult<#initUpperCase(${model.identify})> xr2 = #initLowerCase(${model.identify})Service.update#initUpperCase(${model.identify})(1L,#initLowerCase(${model.identify}));
+			System.out.println("code:"+xr.getCode()+"   message:"+xr2.getMessage()+"  object:"+xr2.getObject());
+			System.out.println(JSON.toJSONString(xr2.getObject()));
+		}else{
+			System.err.println(xr.getMessage());
+		}
+	}
+
+}
+

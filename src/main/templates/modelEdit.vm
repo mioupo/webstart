@@ -1,0 +1,227 @@
+#parse ("util.vm")
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>${model.name} 编辑页面</title>
+        <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
+        <!-- 基本操作控件,保留 -->
+        <link href="../css/bootstrap-3.2.0/css/bootstrap.css" rel="stylesheet" type="text/css" />
+        <link href="../css/bootstrap-box.css" rel="stylesheet" type="text/css" />
+        <link href="../css/bootstrap-page.css" rel="stylesheet" type="text/css" />
+        <link href="../css/myStyle.css" rel="stylesheet" type="text/css" />
+        <link href="../js/validator/jquery.validator.css" rel="stylesheet" type="text/css" />
+        <link href="../js/datapacker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="../js/jquery-1.11.0.min.js"></script>
+        <script type="text/javascript" src="../js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="../js/jsviews.js"></script>
+        <script type="text/javascript" src="../js/loadTmpl.js"></script>
+        <script type="text/javascript" src="../js/base.js"></script>
+        <script	type="text/javascript" src="../js/validator/jquery.validator.js"></script>
+		<script type="text/javascript" src="../js/validator/local/zh_CN.js"></script>
+		<!-- 富文本编辑依赖文件,不用建议删除 -->
+    	<script type="text/javascript" charset="utf-8" src="../ueditor/ueditor.config.js"></script>
+    	<script type="text/javascript" charset="utf-8" src="../ueditor/ueditor.all.min.js"></script>
+    	<script type="text/javascript" charset="utf-8" src="../ueditor/lang/zh-cn/zh-cn.js"></script>
+    	<!-- 日期操作控件 -->
+        <script type="text/javascript" src="../js/datapacker/js/bootstrap-datetimepicker.min.js"></script>
+        <script type="text/javascript" src="../js/datapacker/js/locales/bootstrap-datetimepicker.zh-CN.js"></script>
+        <!-- ajax上传控件 -->
+        <script type="text/javascript" src="../js/ajaxfileupload.js"></script>
+        <script type="text/javascript">
+        	var v_height=123,v_width=151,height,width;
+        	var v_nextPage=0,v_pageSize=10;
+        	#foreach($property in $model.properties)
+        	var v_#initLowerCase(${property.identify}) = "";
+    		#end
+    		//富文本处理全局参数
+        	var ue;
+        	//获取浏览器参数
+			if(getUrlParam("nextPage")){
+				v_nextPage = getUrlParam("nextPage");
+			}
+				    	
+			if(getUrlParam("pageSize")){
+				 v_pageSize = getUrlParam("pageSize");
+			}
+        	#foreach($property in $model.properties)
+	    	if(getUrlParam("#initLowerCase(${property.identify})")){
+	    		v_#initLowerCase(${property.identify}) = getUrlParam("#initLowerCase(${property.identify})");
+	    	}
+    		#end
+	    	
+			$(function(){
+				var tId=getUrlParam("id");
+				if(tId==""){
+					alert("id参数不能为空");
+					return;
+				}
+				$("#tId").val(tId);
+				var url ='../cms/#initLowerCase(${model.identify})/find#initUpperCase(${model.identify})ById';
+				$.ajax({
+					url:url,
+					type:'post',
+					dataType:'json',
+					data:{
+						modelId:tId
+					},
+					success:function(data){
+						if(data.code == 1){
+						var contentHtml=$("#[[#]]##initLowerCase(${model.identify})Tmpl").render(data.object,{mydata: data});
+						$("#[[#]]##initLowerCase(${model.identify})Content").html(contentHtml);
+						}
+						else{
+							var contentHtml=$("#userTmpl").render("");
+							$("#userContent").html(contentHtml);
+						}
+						/** 富文本操作预留,需要可打开此注释
+			            ue = UE.getEditor('myEditor');*/
+			            /** 日期处理预留,需要可打开此注释
+						$("#startTime").datetimepicker({minView: "month",format: 'yyyy-mm-dd',language : 'zh-CN',autoclose: true});
+						$("#endTime").datetimepicker({minView: "month",format: 'yyyy-mm-dd',language : 'zh-CN',autoclose: true});*/
+					}
+				});
+				$("#saveOrupdate").click(function(){
+					$('#submit_form').isValid(function(result){
+					    if(!result){
+							alert("还有不符合规定的字段填写，请检查！");
+							return;
+					    }
+						/** 图片上传处理预留,有图片上传可打开此注释
+			    		if(imgUrl.length == 0){
+							alert("请上传图片!");
+							return;
+						}
+						if(height&&width&&(height != v_height || width != )){
+							alert("为保证终端显示效果,该图片像素建议为"+v_height+"px*"+v_width+"px,请重新上传!");
+							return;
+						}*/
+					    var tId=$("#tId").val();
+						var submit_url = "";
+						if(typeof(tId)=="undefined" || tId == "" || tId == "0"){
+							//新增
+							tId = 0;
+							submit_url = "../cms/#initLowerCase(${model.identify})/save#initUpperCase(${model.identify})";
+						}
+						else{
+							submit_url = "../cms/#initLowerCase(${model.identify})/update#initUpperCase(${model.identify})";
+						}
+			        	/** 富文本操作预留,如需要可打开此注释
+						var content=UE.getEditor('myEditor').getContent();*/
+						$.ajax({
+							url:submit_url,
+							type:"POST",
+							data:{
+								#foreach($property in $model.properties)
+								#initLowerCase(${property.identify}):$("#[[#]]##initLowerCase(${property.identify})").val(),
+								#end
+								tId:tId
+							},
+							success:function(data){
+								if(data.code==1){
+									backAction();
+								}
+								else{
+									alert(data.message);
+								}
+							}
+						});
+					});
+				});
+				/** 图片上传处理预留,有图片上传可打开此注释
+				$(document).on('change','#uploadPhotoFile',function(){
+					$.ajaxFileUpload({
+						url:'../cms/#initLowerCase(${model.identify})/photoUpload',
+						secureuri:false,
+						fileElementId:'uploadPhotoFile',
+						type:'POST',
+						dataType: 'json',			
+						success: function (data, status){
+							if(data){
+								var ds = data.split(":");
+								if(ds[0] == 1){
+									$("#imgUrl").val(ds[1]);
+									$("#myImageShow").attr('src',"../"+ds[1]);
+									$("#myImageShow").attr('width','100px');
+									$("#myImageShow").attr('height','100px');
+									height = ds[2];
+									width = ds[3];
+									$("#imagePx").html("宽:"+ds[3]+"px,高:"+ds[2]+"px");
+									if(height != v_height || width != v_width){
+										alert("为保证终端显示效果,该图片像素建议为"+v_height+"px*"+v_width+"px,请重新上传!");
+									}
+								}
+								else{
+									alert(ds[1]);
+								}
+							}
+						},
+						error: function (data, status, e){
+							alert(data);
+						}
+					});
+				});*/
+			});
+    		//通用返回处理调用函数
+			function backAction(){
+				var url = "#initLowerCase(${model.identify})List.html?";
+		        #foreach($property in $model.properties)
+			    url += "#initLowerCase(${property.identify})="+escape(v_#initLowerCase(${property.identify}))+"&";
+		    	#end
+				url += "nextPage="+v_nextPage + "&pageSize=" + v_pageSize;
+				window.location.href=url;
+			};
+        </script>
+    </head>
+    <body>
+      <section>
+          <div>
+              <div class="col-xs-12">
+                  <div class="box" style="height:900px">
+                      <div class="box-header">
+                      <br>
+                          <input type="button" value="确定" id="saveOrupdate" class="btn btn-success">
+                          <button onclick="backAction();" class="btn btn-info" >返回</button>
+                      </div>
+                     <form id="submit_form" >
+                      <div class="tab" id="#initLowerCase(${model.identify})Content">
+                  	</div>
+                  	</form>
+              </div>
+          </div>
+      </section>
+      <script type="text/x-jsrender" id="#initLowerCase(${model.identify})Tmpl">
+		{{if tId}}
+			<fieldset> 
+				<input type="hidden" id="tId" value="{{:tId}}" />
+				{{!--<input type="hidden" id="imgUrl" value="{{:imgUrl}}"/>
+	        	<li><span>图片:</span></li><li style="height:110px;text-align:left"><img id="myImageShow" src="../{{:imgUrl}}" width="100px" height="100px" /></li>
+				<li style="width:600px;text-align:left"><span style="font-size: 14px;color:red">为保证终端显示效果,该图片像素建议为151px*123px</span></li>
+				<li><span id="imagePx"></span></li>
+				<li style="clear:both;"></li><li style="width:700px;text-align:left"></span><input type="file" id="uploadPhotoFile" name="photoFile" /></li>--}}
+		        #foreach($property in $model.properties)
+	        	<li class="controls">${property.name}:</li>
+				<li style="width:300px;text-align:left;">
+					<input type="text" placeholder="请填写${property.name}" data-rule="${property.name}:required;#if($property.length>0)length[0~${property.length}]#end" id="#initLowerCase(${property.identify})" name="#initLowerCase(${property.identify})" value="{{:#initLowerCase(${property.identify})}}" />
+				</li>
+		    	#end
+			</fieldset>
+		{{else}}
+			<fieldset> 
+				{{!--<input type="hidden" id="imgUrl"/>
+	        	<li><span>图片:</span></li><li style="height:110px;text-align:left"><img id="myImageShow" src="" width="100px" height="100px" /></li>
+				<li style="width:600px;text-align:left"><span style="font-size: 14px;color:red">为保证终端显示效果,该图片像素建议为151px*123px</span></li>
+				<li><span id="imagePx"></span></li>
+				<li style="clear:both;"></li><li style="width:700px;text-align:left"></span><input type="file" id="uploadPhotoFile" name="photoFile" /></li>--}}
+		        #foreach($property in $model.properties)
+	        	<li class="controls">${property.name}:</li>
+				<li style="width:300px;text-align:left;">
+					<input type="text" placeholder="请填写${property.name}" data-rule="${property.name}:required;#if($property.length>0)length[0~${property.length}]#end" id="#initLowerCase(${property.identify})" name="#initLowerCase(${property.identify})" />
+				</li>
+		    	#end
+			</fieldset>
+		{{/if}}
+	</script>
+      
+    </body>
+</html>

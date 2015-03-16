@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>系统登录</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+<!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+<link href="css/bootstrap-3.2.0/css/bootstrap.css" rel="stylesheet" type="text/css" />
+<link href="css/bootstrap-box.css" rel="stylesheet" type="text/css" />
+<link href="css/bootstrap-page.css" rel="stylesheet" type="text/css" />
+<link href="js/validator/jquery.validator.css"	rel="stylesheet" type="text/css" />
+<script src="js/jquery-1.11.0.min.js" type="text/javascript"></script>
+<script src="js/bootstrap.min.js"	type="text/javascript"></script>
+<script src="js/jsviews.js" type="text/javascript" ></script>
+<script src="js/base.js" type="text/javascript"></script>
+<script src="js/validator/jquery.validator.js"	type="text/javascript"></script>
+<script src="js/validator/local/zh_CN.js"	type="text/javascript"></script>
+<script src="js/jquery.cookie.js"	type="text/javascript"></script>	
+	
+<style>
+ {
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	font-family: "宋体";
+}
+
+.loginBox {
+	width: 600px;
+	height: 350px;
+	padding: 0 20px;
+	border: 1px solid #fff;
+	color: #000;
+	margin-top: 30px;
+	border-radius: 8px;
+	background: white;
+	box-shadow: 0 0 15px #222;
+	background: -moz-linear-gradient(top, #fff, #efefef 8%);
+	background: -webkit-gradient(linear, 0 0, 0 100%, from(#f6f6f6),
+		to(#f4f4f4));
+	font: 11px/1.5em 'Microsoft YaHei';
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	margin-left: -310px;
+	margin-top: -205px;
+}
+
+.loginBox h2 {
+	height: 45px;
+	font-size: 20px;
+	font-weight: normal;
+}
+
+.loginBox .left {
+	border-right: 1px solid #ccc;
+	height: 100%;
+	padding-right: 20px;
+}
+
+.regBtn {
+	margin-top: 21px;
+}
+
+</style>
+
+</head>
+<body>
+	<div class="container">
+		<form action="j_spring_security_check"  class="form-inline"  method="post" id="loginForm">
+		<input type="hidden" name="SPRING_REQUEST_KEY" value="0"><!-- 指定字段名并将该值设置为0,为类型一登录 -->
+			<section class="loginBox row">
+			<div class="row-fluid">
+				<section class="span5">
+					<h2>圣米卢展览后台管理</h2>
+					<p id="errorMessage" style="color: red;"></p>
+					<p>
+						<input type="text" id="adminName" class="form-control input-sm" name="j_username" placeholder="用户名"
+							data-rule="filter;required;username;" />
+					</p>
+					<p>
+						<input type="password" id="adminPassword" class="form-control input-sm"  name="j_password" placeholder="密码"
+							data-rule="filter;required;" />
+					</p>
+				   <p>
+						    <label class="checkbox inline" for="remember">记住密码 </label><input type="checkbox"  id="remember" >
+  					</p>
+						<p> 
+							<input type="button" value=" 登录 "  onclick="saveUserInfo()"  class="btn btn-primary">
+						</p> 
+				</section> 
+				<div style="position:absolute;left:240px;top:80px;">
+					<img src="image/logo-max.png" width="350px">
+				</div>
+				</div>
+			</section>
+			<!-- /loginBox -->
+		</form>
+	</div>
+	<Script>
+	
+	//保存用户信息
+	function saveUserInfo() {
+	    if ($("input[type='checkbox']").is(":checked")) {
+	        var userName = $("#adminName").val();
+	        var passWord = $("#adminPassword").val();	
+	        $.cookie("remember", "true", { expires: 7 }); // 存储一个带7天期限的 cookie
+	        $.cookie("userName", userName, { expires: 7 }); // 存储一个带7天期限的 cookie
+	        $.cookie("passWord", passWord, { expires: 7 }); // 存储一个带7天期限的 cookie
+	    }
+	    else {
+	        $.cookie("remember", "false", { expires: -1 });
+	        $.cookie("userName", '', { expires: -1 });
+	        $.cookie("passWord", '', { expires: -1 });
+	    }
+	    $("#loginForm").submit();
+	    
+	}
+		$(function() {
+			if(window.parent!=window){
+				window.parent.location.reload();
+			}
+			document.onkeydown =function(evt){
+				var evt = window.event?window.event:evt;
+				if (evt.keyCode==13) {
+					saveUserInfo();  
+			    　}
+			};
+			 var error=getUrlParam("login_error");
+			 console.log(error);
+			if(typeof(error)!="undefined" && error!=null){
+				$("#errorMessage").html("用户名或密码错误");
+			}
+		    if ($.cookie("remember") == "true") {
+		        $("#remember").attr("checked", true);
+		        $("#adminName").val($.cookie("userName"));
+		        $("#adminPassword").val($.cookie("passWord"));
+		    }
+		});
+	</Script>
+	<!-- /container -->
+</body>
+</html>

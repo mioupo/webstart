@@ -1,0 +1,14 @@
+#parse ("util.vm")
+package com.xa3ti.#toLowerCase(${project.identify}).business.repository;
+
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.repository.PagingAndSortingRepository;
+
+import com.xa3ti.#toLowerCase(${project.identify}).business.entity.#initUpperCase(${model.identify});
+
+
+public interface #initUpperCase(${model.identify})Repository extends
+		PagingAndSortingRepository<#initUpperCase(${model.identify}), Long>,
+		JpaSpecificationExecutor<#initUpperCase(${model.identify})> {
+	public #initUpperCase(${model.identify}) findBytIdAndStatusNot(Long id,Integer status);
+}

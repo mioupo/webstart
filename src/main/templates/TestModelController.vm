@@ -1,0 +1,64 @@
+#parse ("util.vm")
+package com.xa3ti.#toLowerCase(${project.identify}).test.controller;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import org.junit.Test;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
+
+import com.alibaba.fastjson.JSON;
+import com.xa3ti.#toLowerCase(${project.identify}).business.entity.#initUpperCase(${model.identify});
+import com.xa3ti.#toLowerCase(${project.identify}).test.base.XaTestWebBase;
+
+public class Test#initUpperCase(${model.identify})Controller extends XaTestWebBase{
+
+	@Test
+	public void testFind#initUpperCase(${model.identify})() {
+		try {
+			ResultActions ra = mockMvc.perform(get(
+					"/#initLowerCase(${model.identify})").accept(
+					MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON).characterEncoding("UTF-8"));
+			MvcResult mr = ra.andReturn();
+			System.out.println("Response:\r\n"
+					+ mr.getResponse().getContentAsString());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	@Test
+	public void testCreate#initUpperCase(${model.identify})() {
+		try {
+			#initUpperCase(${model.identify}) #initLowerCase(${model.identify}) = new #initUpperCase(${model.identify})();
+			//请构造测试数据
+			String data = JSON.toJSONString(#initLowerCase(${model.identify}));
+			ResultActions ra = mockMvc.perform(post(
+					"/#initLowerCase(${model.identify})").accept(
+					MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON).characterEncoding("UTF-8").content(data));
+			MvcResult mr = ra.andReturn();
+			System.out.println("Response:\r\n"
+					+ mr.getResponse().getContentAsString());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	@Test
+	public void testUpdate#initUpperCase(${model.identify})() {
+		try {
+			#initUpperCase(${model.identify}) #initLowerCase(${model.identify}) = new #initUpperCase(${model.identify})();
+			//请构造测试数据
+			String data = JSON.toJSONString(#initLowerCase(${model.identify}));
+			ResultActions ra = mockMvc.perform(put(
+					"/#initLowerCase(${model.identify})").accept(
+					MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON).characterEncoding("UTF-8").content(data));
+			MvcResult mr = ra.andReturn();
+			System.out.println("Response:\r\n"
+					+ mr.getResponse().getContentAsString());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+}

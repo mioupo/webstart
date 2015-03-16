@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>圣米庐 | 属性列表</title>
+        <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
+        <!-- bootstrap 3.0.2 -->
+        <link href="css/bootstrap-3.2.0/css/bootstrap.css" rel="stylesheet" type="text/css" />
+        <link href="css/bootstrap-box.css" rel="stylesheet" type="text/css" />
+        <link href="css/bootstrap-page.css" rel="stylesheet" type="text/css" />
+        <link rel="stylesheet" href="js/resizableColumns/jquery.resizableColumns.css">
+        <link href="js/validator/jquery.validator.css" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="js/jquery-1.11.0.min.js"></script>
+        <script type="text/javascript" src="js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="js/resizableColumns/jquery.resizableColumns.js"></script>
+        <script type="text/javascript" src="js/jsviews.js"></script>
+        <script type="text/javascript" src="js/loadTmpl.js"></script>
+        <script src="js/base.js" type="text/javascript"></script>
+        <script type="text/javascript" src="js/tableGrid/jquery.tableGrid.js"></script>
+        <script	type="text/javascript" src="js/validator/jquery.validator.js"></script>
+		<script type="text/javascript" src="js/validator/local/zh_CN.js"></script>
+        <script type="text/javascript">  
+        	//从后台取数据，并加载模板
+	        function displayContent(){
+	        	
+				var nextPage=$("#_click_page").val();			//不变
+				if(typeof(nextPage) == 'undefined' || nextPage==""){
+					nextPage=0;
+				}
+				var modelId=getUrlParam("modelId");
+				var projectId=getUrlParam("projectId");
+				var modelName=getUrlParam("modelName");
+				var prjName=getUrlParam("prjName");
+				if(modelId==""){
+					alert("modelId参数不能为空");
+					return;
+				}
+				$("#_modelId").val(modelId);
+				$("#currentPrj").html(prjName);
+				$("#currentModel").html(modelName);
+				$("#reback").attr("href","entity.html?projectId="+projectId);
+				var jsonFilter = '{search_EQ_modelId:"' + modelId + '"}';
+				var pageSize=$("#selectPageSize").val();
+				var url=root+"property";
+				$.ajax({
+					url:url,
+					dataType:'json',
+					type:'get',
+					data:{
+						nextPage:nextPage,
+						pageSize:pageSize,
+						jsonFilter:jsonFilter
+					},
+					success:function(data){
+						var tableData=data.object.content;
+		            	var tblContentHtml = $("#tableContentTmple").render(tableData);
+		            	$("#mycontent").html(tblContentHtml);
+		            	//加载分页器
+		            	loadTmpl.renderExternalTemplate("page", "#displayPage", data.object);
+					}
+				});
+	        }
+			$(function(){
+				$("#example2").resizableColumns({});	//列拖动
+				//行高亮,选中
+				$("#example2").tableGrid({
+					checkAllId:"_selectAll",	//全选框的ID属性
+					singleCheckboxClass:"ckSelect",
+					selectRowClass:"warning",
+					paging:"displayPage",
+					pageAjax:function(){
+						displayContent();
+					}
+				});
+				//点击新增按钮
+				$("#addSome").click(function(){
+					$("#myModalLabel").html("新增属性");
+					$("#modelCU")[0].reset();
+					$("#_propertyId").val("");	//清除掉_propertyId,防止之前修改过
+					$("#modelCU").validator("cleanUp");
+					$("#myModalDlg").modal("show");
+				});
+				//新增或修改
+				$("#modelCU").validator({
+					valid:function(form){
+						var propertyId=$("#_propertyId").val();
+						var modelId=$("#_modelId").val();
+						var name=$("#_name").val();
+						var identifiy=$("#_identify").val();
+						var description=$("#_description").val();
+						var type=$("#_type").val();
+						var nullAble=$("input[name='nullable']:checked").val();
+						var length=$("#_length").val();
+						var property="";
+						if(propertyId==""){
+						//新增
+						
+							property={"name":name,
+								"identify":identifiy,
+								"description":description,
+								"type":type,
+								"nullAble":nullAble,
+								"length":length,
+								"modelId":modelId
+							};
+							url=root+"property";	
+							$.ajax({
+								url:url,
+								type:"POST",
+								dataType: "json",
+				                contentType: "application/json",
+								data:JSON.stringify(property),
+								success:function(data){
+									if(data.code==1){
+										$('#myModalDlg').modal('hide');
+										displayContent();
+									}else{
+										alert(data.message);
+									}
+								}
+							});
+						}else{
+							//修改
+							property={"id":propertyId,
+								"name":name,
+								"identify":identifiy,
+								"description":description,
+								"type":type,
+								"nullAble":nullAble,
+								"length":length,
+								"modelId":modelId
+							};
+							url=root+"property";
+							$.ajax({
+								url:url,
+								type:"PUT",
+								dataType: "json",
+				                contentType: "application/json",
+								data:JSON.stringify(property),
+								success:function(data){
+									if(data.code==1){
+										$('#myModalDlg').modal('hide');
+										displayContent();
+									}else{
+										alert(data.message);
+									}
+								}
+							});
+						}
+					}
+				}).on("click","#saveOrupdate",function(e){
+					$(e.delegateTarget).trigger("validate");
+				});
+				
+				//点击修改按钮
+				$("#updateSome").click(function(){
+					$("#modelCU").validator("cleanUp");
+					var updateArray=new Array();
+					$(".ckSelect").each(function(){
+                    	var check=$(this).is(':checked');
+                    	if(check){
+							var _id =$(this).attr("ckId");
+							updateArray.push(_id);
+                        }
+                    });
+					if(updateArray.length==0){
+						alert("请选择要编辑的项");
+						return;
+					}
+					if(updateArray.length>1){
+						alert("每次只能编辑一项");
+						return;
+					}
+					$.ajax({
+						url:root+"property/"+updateArray[0],
+						type:"get",
+						dataType: "json",
+		                contentType: "application/json",
+						success:function(selectData){
+							if(selectData.code==1){
+								console.log(selectData.object);
+								$("#_name").val(selectData.object.name);
+								$("#_identify").val(selectData.object.identify);
+								$("#_description").val(selectData.object.description);
+// 								$("#_modelId").val(selectData.object.modelId);
+								$("#_propertyId").val(selectData.object.id);
+								if(selectData.object.nullAble==0){
+									$("#nullAble1").attr("checked","");
+								}else{
+									$("#nullAble2").attr("checked","checked");
+								}
+								$("#_nullAble").val(selectData.object.nullAble);
+								$("#_type").val(selectData.object.type);
+								$("#_length").val(selectData.object.length);
+								$("#myModalLabel").html("编辑属性");
+								$("#myModalDlg").modal("show");
+							}else{
+								alert(selectData.message);
+							}
+							
+						}
+					});
+				});
+				
+				//点击查询按钮
+				$("#search").click(function(){
+					displayContent();
+				});
+				//点击删除按钮
+				$("#delSome").click(function(){
+					var delStr="";
+					var delArray=new Array();
+					$(".ckSelect").each(function(){
+                    	var check=$(this).is(':checked');
+                    	if(check){
+							var _id =$(this).attr("ckId");
+							delStr+=parseInt(_id)+",";
+							delArray.push(_id);
+                        }
+                    });
+                    if(delStr.length==0){
+						alert("请选择要删除的项");
+						return
+                    }
+                    if(confirm("你确定要删除选中项吗？")){
+                    	var url=root+"property/"+delArray[0];
+                    	$.ajax({
+							url:url,
+							type:'DELETE',
+							dataType:'json',
+							success:function(data){
+								if(data.code==1){
+									displayContent();
+								}else{
+									alert(data.message);
+								}
+							}
+                        });
+                    }
+				});
+			});
+			
+        </script>
+    </head>
+    <body>
+      <section>
+          <div>
+              <div class="col-xs-12">
+                  <div class="box">
+                      <div class="box-header">
+                      <br>
+                       <span class="add-on">资源名称:</span><input type="text" id="resourceName"/>
+                          <input type="button" value="搜索" id="search" class="btn btn-primary">
+                      </div>
+                      <div class="box-header">
+                      <br>
+                       <span class="add-on">当前工程:</span><span id="currentPrj"></span><br/>
+                       <span class="add-on">当前实体:</span><span id="currentModel"></span>
+                      </div>
+                      <div class="box-header">
+                      <br>
+                          <input type="button" value="新增" id="addSome" class="btn btn-success">
+                          <input type="button" value="删除" id="delSome" class="btn btn-danger">
+                          <input type="button" value="编辑" id="updateSome" class="btn btn-info">
+                          <a  href="entity.html" id="reback" class="btn btn-info" >返回</a>
+                      </div>
+                      <div class="box-body table-responsive">
+                          <table id="example2" class="table table-bordered table-hover">
+                              <thead>
+                                  <tr>
+                                      <th><input type="checkbox" id="_selectAll" /></th>
+                                      <th id='name'>属性中文名称</th>
+                                      <th id='identify'>属性名</th>
+                                      <th id='description'>实体描述</th>
+                                      <th id='type'>类型</th>
+                                      <th id='nullAble'>是否可以为空</th>
+                                      <th id='length'>长度</th>
+                                  </tr>
+                              </thead>
+                              <!-- 表格内容 start -->
+                              <tbody id="mycontent"></tbody>
+                              <!-- 表格内容 end -->
+                          </table>
+                          <!-- 分页标签 start -->
+                          <div class="row" id="displayPage"></div>
+                          <script id="tableContentTmple" type="text/x-jsrender">
+								<tr>
+									<td><input id="ck_{{:id}}" ckId="{{:id}}" class="ckSelect" type="checkbox" /></td>
+									<td>{{:name}}</td>
+									<td>{{:identify}}</td>
+									<td>{{:description}}</td>
+									<td>{{:type}}</td>
+									<td>{{if nullAble==0}}可以为空{{else}}不能为空{{/if}}</td>
+									<td>{{:length}}</td>
+								</tr>
+						  </script>
+                  </div>
+              </div>
+              <input type="hidden" id="_modelId" />
+              <input type="hidden" id="_projectId" />
+          </div>
+      </section>
+	<!-- 新增对话框  start -->
+	<form class="form-horizontal" id="modelCU" role="form">
+	<div class="modal fade" id="myModalDlg" tabindex="-1" role="dialog"
+		aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">新增属性</h4>
+				</div>
+				<div class="modal-body">
+						<input type="hidden" id="_propertyId" />
+						<div class="form-group form-group-sm">
+							<label class="col-sm-2 control-label" for="goodsName">中文名称</label>
+							<div class="col-sm-4">
+								<input class="form-control" type="text" id="_name" data-rule="中文名称:required;length[1~40]"
+									placeholder="中文名称" />
+							</div>
+						</div>
+						<div class="form-group form-group-sm">
+							<label class="col-sm-2 control-label" for="goodsName">属性名称</label>
+							<div class="col-sm-4">
+								<input class="form-control" type="text" id="_identify" data-rule="属性名称:required;length[3~40]"
+									placeholder="英文字符串" />
+							</div>
+						</div>
+						<div class="form-group form-group-sm">
+							<label class="col-sm-2 control-label" for="goodsName">类型</label>
+							<div class="col-sm-4">
+								<select  class="form-control" id="_type" data-rule="required;">
+								<option value="String">String</option>
+								<option value="Long">Long</option>
+								<option  value="Integer">Integer</option>
+								<option  value="Boolean">Boolean</option>
+								<option  value="Float">Float</option>
+								<option  value="Double">Double</option>
+								<option  value="MEDIUMTEXT">MEDIUMTEXT</option>
+								</select>
+							</div>
+						</div>
+						<div class="form-group form-group-sm">
+							<label class="col-sm-2 control-label" for="goodsName">是否可以为空</label>
+							<div class="col-sm-4">
+								<label class="radio-inline">
+								  <input type="radio" name="nullable" id="_nullAble1" checked="checked" value="0"> 是
+								</label>
+								<label class="radio-inline">
+								  <input type="radio" name="nullable" id="_nullAble1" value="1"> 否
+								</label>
+							</div>
+						</div>
+						<div class="form-group form-group-sm">
+							<label class="col-sm-2 control-label" for="goodsName">长度</label>
+							<div class="col-sm-4">
+								<input class="form-control" type="text" value="50" id="_length" data-rule="长度:required;length[1~200]"	/>
+							</div>
+						</div>
+						<div class="form-group form-group-sm">
+							<label class="col-sm-2 control-label" for="goodsName">描述</label>
+							<div class="col-sm-4">
+							<textarea class="form-control" style="width: 180px;height: 160px;" id="_description" data-rule="描述:required;length[1~200]"></textarea>
+							</div>
+						</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭
+					</button>
+					<button type="button" id="saveOrupdate" class="btn btn-primary">
+						确定</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	</form>
+	<!-- 新增对话框  end -->
+    </body>
+</html>
